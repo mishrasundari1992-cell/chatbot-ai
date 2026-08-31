@@ -10,9 +10,19 @@ class Base(DeclarativeBase):
     pass
 
 
+def sqlalchemy_database_url(url: str) -> str:
+    """Use the installed Psycopg 3 driver for standard PostgreSQL URLs."""
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+psycopg://", 1)
+    return url
+
+
 settings = get_settings()
+database_url = sqlalchemy_database_url(settings.database_url)
 engine = create_engine(
-    settings.database_url,
+    database_url,
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
