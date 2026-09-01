@@ -1,0 +1,33 @@
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--line);
+}
+.action-buttons .link-button { border-radius: 0; padding: 12px 16px; }
+.career-form {
+  border-top: 1px solid var(--line);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  max-height: 55vh;
+  overflow: auto;
+}
+.career-form h2 { font-size: 17px; margin: 0; }
+.career-form.hidden { display: none; }
+.career-form textarea { min-height: 72px; resize: vertical; }
+.career-form p { margin: 0; color: var(--muted); }
+.form-notice {
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff4d8;
+  color: #6c4b00 !important;
+  font-size: 13px;
+}
+.file-label { font-size: 13px; color: var(--muted); }
+.file-label input { margin-top: 4px; background: #fff; }
+.consent { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--muted); }
+.consent input { width: auto; margin-top: 3px; }
+@media (max-width: 560px) {
+  .action-buttons { grid-template-columns: 1fr; }
+  .career-form { max-height: 65vh; }
+}

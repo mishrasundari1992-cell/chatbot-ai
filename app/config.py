@@ -37,6 +37,14 @@ class Settings(BaseSettings):
     # Retained for compatibility with existing environments; providers always standardize to 1024.
     embedding_dimensions: int = Field(STANDARD_EMBEDDING_DIMENSIONS, ge=256, le=4096)
     max_answer_tokens: int = Field(500, ge=64, le=2000)
+    max_resume_mb: int = Field(5, ge=1, le=10)
+    hr_notification_email: str = "hrd@itsipl.com"
+    smtp_host: str = ""
+    smtp_port: int = Field(587, ge=1, le=65535)
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    smtp_from_email: str = ""
+    smtp_use_tls: bool = True
 
     @field_validator("admin_api_key")
     @classmethod
