@@ -52,6 +52,14 @@ curl.exe -X POST http://localhost:8000/api/chat -H "Content-Type: application/js
 curl.exe -X POST http://localhost:8000/api/leads -H "Content-Type: application/json" -d '{"name":"Alex","company":"Example Ltd","email":"alex@example.com","phone":"+91 9876543210","requirement":"Please contact me about implementation."}'
 ```
 
+### Careers applications
+
+The public careers form submits candidates to `POST /api/careers/applications` as multipart form data. It accepts PDF or DOCX resumes up to `MAX_RESUME_MB` (5 MB by default), creates an `ITS-CAR-...` reference, and always stores the initial status as `new_hr_review`. The service does not automatically shortlist or reject candidates.
+
+Set the optional SMTP variables in `.env.example` to notify `HR_NOTIFICATION_EMAIL` and attach the submitted resume. If SMTP is not configured, the application is still saved in PostgreSQL.
+
+For the ITSIPL WordPress Careers page, copy `wordpress/itsipl-careers-chatbot.html` into a Custom HTML block. The `?mode=careers` parameter opens the HR form automatically and displays the recruitment-routing notice.
+
 ## Configuration
 
 `AI_PROVIDER_MODE` accepts `mock` (default), `openai`, or `bedrock`. Mock mode uses deterministic local embeddings and returns a clearly labelled sample answer composed from retrieved document excerpts; it needs no AI key and makes no external AI calls. Selecting OpenAI or Bedrock without its required configuration returns a safe readiness/service error without stopping the application.

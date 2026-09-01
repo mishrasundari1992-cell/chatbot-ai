@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy import text
 
-from app.api import admin, admin_pages, chat, leads
+from app.api import admin, admin_pages, careers, chat, leads
 from app.config import get_settings
 from app.database import engine
 from app.main_state import limiter
@@ -32,6 +32,7 @@ app.add_middleware(
 )
 app.include_router(chat.router)
 app.include_router(leads.router)
+app.include_router(careers.router)
 app.include_router(admin.router)
 app.include_router(admin_pages.router)
 

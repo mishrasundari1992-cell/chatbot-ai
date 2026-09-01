@@ -38,6 +38,37 @@ class LeadResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class CareerApplicationCreate(BaseModel):
+    conversation_id: uuid.UUID | None = None
+    full_name: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    phone: str = Field(min_length=7, max_length=32, pattern=r"^[0-9+() .-]+$")
+    position: str = Field(min_length=2, max_length=160)
+    qualification: str = Field(min_length=2, max_length=200)
+    experience_years: str = Field(min_length=1, max_length=40)
+    skills: str = Field(min_length=2, max_length=3000)
+    current_location: str = Field(min_length=2, max_length=160)
+    notice_period: str = Field(min_length=1, max_length=100)
+    current_company: str | None = Field(default=None, max_length=160)
+    message: str | None = Field(default=None, max_length=2000)
+    consent_to_contact: bool
+
+    @field_validator("consent_to_contact")
+    @classmethod
+    def require_contact_consent(cls, value: bool) -> bool:
+        if not value:
+            raise ValueError("Consent is required to submit an application")
+        return value
+
+
+class CareerApplicationResponse(BaseModel):
+    id: uuid.UUID
+    reference: str
+    status: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
 class DocumentResponse(BaseModel):
     id: uuid.UUID
     filename: str

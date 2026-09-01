@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Company Assistant</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/careers.css">
 </head>
 <body>
   <main class="shell">
@@ -25,7 +26,24 @@
         <button id="send-message" type="submit" aria-label="Send message">Send</button>
       </form>
       <p id="voice-status" class="voice-status" role="status" aria-live="polite">Voice: stopped</p>
-      <button id="lead-toggle" class="link-button" type="button">Interested in working with us? Leave your details</button>
+      <div class="action-buttons" aria-label="Assistant actions">
+        <button id="career-toggle" class="link-button" type="button">Apply for a job</button>
+        <button id="lead-toggle" class="link-button" type="button">Business enquiry</button>
+      </div>
+      <form id="career-form" class="career-form hidden" enctype="multipart/form-data">
+        <h2>Apply to ITSIPL</h2>
+        <p class="form-notice">Job applications are handled only through this form or hrd@itsipl.com. Please do not call Sales, Import or Management regarding recruitment.</p>
+        <div class="grid"><input name="full_name" maxlength="120" placeholder="Full name" required><input name="email" type="email" placeholder="Email" required></div>
+        <div class="grid"><input name="phone" maxlength="32" placeholder="Phone" required><input name="position" maxlength="160" placeholder="Position applied for" required></div>
+        <div class="grid"><input name="qualification" maxlength="200" placeholder="Highest qualification" required><input name="experience_years" maxlength="40" placeholder="Relevant experience (for example, 2 years)" required></div>
+        <textarea name="skills" maxlength="3000" placeholder="Main skills" required></textarea>
+        <div class="grid"><input name="current_location" maxlength="160" placeholder="Current location" required><input name="notice_period" maxlength="100" placeholder="Notice period" required></div>
+        <input name="current_company" maxlength="160" placeholder="Current company (optional)">
+        <textarea name="message" maxlength="2000" placeholder="Why are you suitable for this position? (optional)"></textarea>
+        <label class="file-label">Resume (PDF or DOCX, maximum 5 MB)<input name="resume" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required></label>
+        <label class="consent"><input name="consent_to_contact" type="checkbox" value="true" required> I agree that ITSIPL may contact me by phone, email or WhatsApp about this application.</label>
+        <button type="submit">Submit application</button><p id="career-status" role="status" aria-live="polite"></p>
+      </form>
       <form id="lead-form" class="lead-form hidden">
         <div class="grid"><input name="name" maxlength="120" placeholder="Name" required><input name="company" maxlength="160" placeholder="Company" required></div>
         <div class="grid"><input name="email" type="email" placeholder="Email" required><input name="phone" maxlength="32" placeholder="Phone" required></div>

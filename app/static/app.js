@@ -11,6 +11,8 @@ const rateSelect = document.querySelector('#voice-rate');
 const stopSpeakingButton = document.querySelector('#stop-speaking');
 const leadForm = document.querySelector('#lead-form');
 const leadStatus = document.querySelector('#lead-status');
+const careerForm = document.querySelector('#career-form');
+const careerStatus = document.querySelector('#career-status');
 let conversationId = sessionStorage.getItem('conversationId');
 let recognition = null;
 let isListening = false;
@@ -134,7 +136,13 @@ if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) {
   showVoiceNotice('Voice input is not supported by this browser. You can continue using text chat.');
 }
 
-addMessage('Hello! Ask me anything about our company, services, or policies.', 'bot');
+const pageMode = new URLSearchParams(window.location.search).get('mode');
+if (pageMode === 'careers') {
+  addMessage('Welcome to ITSIPL Careers. Use “Apply for a job” to submit your profile. Recruitment enquiries are not handled through Sales, Import or Management phone numbers.', 'bot');
+  careerForm.classList.remove('hidden');
+} else {
+  addMessage('Hello! Ask me anything about our company, services, policies, technical support, or careers.', 'bot');
+}
 chatForm.addEventListener('submit', async event => {
   event.preventDefault();
   const message = input.value.trim();
@@ -156,6 +164,7 @@ chatForm.addEventListener('submit', async event => {
 });
 
 document.querySelector('#lead-toggle').addEventListener('click', () => leadForm.classList.toggle('hidden'));
+document.querySelector('#career-toggle').addEventListener('click', () => careerForm.classList.toggle('hidden'));
 leadForm.addEventListener('submit', async event => {
   event.preventDefault();
   const button = leadForm.querySelector('button');
@@ -170,4 +179,29 @@ leadForm.addEventListener('submit', async event => {
     leadForm.reset();
   } catch (error) { leadStatus.textContent = error.message; }
   finally { button.disabled = false; }
+});
+
+careerForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const button = careerForm.querySelector('button[type="submit"]');
+  const formData = new FormData(careerForm);
+  const resume = formData.get('resume');
+  if (resume && resume.size > 5 * 1024 * 1024) {
+    careerStatus.textContent = 'Resume must be no larger than 5 MB.';
+    return;
+  }
+  if (conversationId) formData.set('conversation_id', conversationId);
+  button.disabled = true;
+  careerStatus.textContent = 'Submitting your application…';
+  try {
+    const response = await fetch('/api/careers/applications', {method: 'POST', body: formData});
+    const data = await response.json();
+    if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Please check the application details and try again.');
+    careerStatus.textContent = `Application submitted for HR review. Your reference is ${data.reference}. Please do not call other departments for recruitment updates.`;
+    careerForm.reset();
+  } catch (error) {
+    careerStatus.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
 });

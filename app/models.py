@@ -78,6 +78,36 @@ class Lead(Base):
     __table_args__ = (Index("ix_leads_email", "email"), Index("ix_leads_created_at", "created_at"))
 
 
+class CareerApplication(Base):
+    __tablename__ = "career_applications"
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    reference: Mapped[str] = mapped_column(String(32), nullable=False, unique=True)
+    conversation_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("conversations.id", ondelete="SET NULL"))
+    full_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    email: Mapped[str] = mapped_column(String(320), nullable=False)
+    phone: Mapped[str] = mapped_column(String(32), nullable=False)
+    position: Mapped[str] = mapped_column(String(160), nullable=False)
+    qualification: Mapped[str] = mapped_column(String(200), nullable=False)
+    experience_years: Mapped[str] = mapped_column(String(40), nullable=False)
+    skills: Mapped[str] = mapped_column(Text, nullable=False)
+    current_location: Mapped[str] = mapped_column(String(160), nullable=False)
+    notice_period: Mapped[str] = mapped_column(String(100), nullable=False)
+    current_company: Mapped[str | None] = mapped_column(String(160))
+    message: Mapped[str | None] = mapped_column(Text)
+    resume_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    resume_content_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    resume_size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    resume_content: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="new_hr_review", nullable=False)
+    consent_to_contact: Mapped[bool] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+    __table_args__ = (
+        Index("ix_career_applications_email", "email"),
+        Index("ix_career_applications_status_created", "status", "created_at"),
+    )
+
+
 class UsageRecord(Base):
     __tablename__ = "usage_records"
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)

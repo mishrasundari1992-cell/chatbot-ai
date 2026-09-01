@@ -76,6 +76,8 @@ def test_static_interface():
     assert 'id="microphone"' in response.text
     assert 'value="en-IN"' in response.text
     assert 'value="hi-IN"' in response.text
+    assert 'id="career-form"' in response.text
+    assert 'name="resume"' in response.text
 
 
 def test_voice_implementation_is_browser_only():
@@ -87,3 +89,24 @@ def test_voice_implementation_is_browser_only():
     assert "recognition.start()" in script
     assert "/api/transcription" not in script
     assert "/api/tts" not in script
+
+
+def test_career_application_rejects_unsupported_resume_before_database_write():
+    response = client.post(
+        "/api/careers/applications",
+        data={
+            "full_name": "Test Candidate",
+            "email": "candidate@example.com",
+            "phone": "+91 9999999999",
+            "position": "General Application",
+            "qualification": "Graduate",
+            "experience_years": "2 years",
+            "skills": "Python and SQL",
+            "current_location": "Delhi",
+            "notice_period": "30 days",
+            "consent_to_contact": "true",
+        },
+        files={"resume": ("resume.exe", b"not-a-resume", "application/octet-stream")},
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Resume must be a PDF or DOCX file"
