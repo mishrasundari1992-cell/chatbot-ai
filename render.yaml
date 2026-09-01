@@ -47,6 +47,8 @@ services:
         value: "10"
       - key: MAX_CONTEXT_CHUNKS
         value: "5"
+      - key: RETRIEVAL_DISTANCE_THRESHOLD
+        value: "0.70"
       - key: MONTHLY_TOKEN_LIMIT
         value: "1000000"
       - key: RATE_LIMIT_PER_MINUTE

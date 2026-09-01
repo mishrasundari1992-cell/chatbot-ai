@@ -26,6 +26,12 @@ def test_verified_apac_bedrock_defaults():
     assert settings.bedrock_embedding_dimensions == 1024
 
 
+def test_retrieval_threshold_default_and_environment_override(monkeypatch):
+    assert Settings(_env_file=None, admin_api_key="a" * 24).retrieval_distance_threshold == 0.70
+    monkeypatch.setenv("RETRIEVAL_DISTANCE_THRESHOLD", "0.82")
+    assert Settings(_env_file=None, admin_api_key="a" * 24).retrieval_distance_threshold == 0.82
+
+
 def test_pytest_environment_forces_hermetic_mock_ai_configuration():
     assert os.environ["AI_PROVIDER_MODE"] == "mock"
     assert os.environ["OPENAI_API_KEY"] == ""

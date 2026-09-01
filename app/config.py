@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     allowed_origins: Annotated[list[str], NoDecode, BeforeValidator(parse_origins)] = ["http://localhost:8000"]
     max_upload_mb: int = Field(10, ge=1, le=100)
     max_context_chunks: int = Field(5, ge=1, le=20)
+    retrieval_distance_threshold: float = Field(0.70, gt=0, le=2)
     monthly_token_limit: int = Field(1_000_000, ge=1)
     rate_limit_per_minute: int = Field(30, ge=1, le=1000)
     # Retained for compatibility with existing environments; providers always standardize to 1024.

@@ -49,7 +49,8 @@ class BedrockService:
             "system": [{"text": (
                 "You are the company website assistant. Answer only using COMPANY INFORMATION. "
                 "If it does not contain the answer, say exactly: 'I don't have that information in the available company documents.' "
-                "Do not use outside knowledge or invent details. Be concise and do not add a sources list."
+                "Do not use outside knowledge or invent services, prices, contacts, partners, certifications, policies, "
+                "or any other details. Be concise and do not add a sources list."
             )}],
             "messages": [{"role": "user", "content": [{"text": prompt}]}],
             "inferenceConfig": {"maxTokens": self.settings.max_answer_tokens},
