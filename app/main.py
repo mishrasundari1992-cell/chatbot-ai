@@ -13,7 +13,7 @@ from app.api import admin, admin_pages, careers, chat, leads
 from app.config import get_settings
 from app.database import engine
 from app.main_state import limiter
-from app.schemas import StatusResponse
+from app.schemas import PublicConfigResponse, StatusResponse
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -54,6 +54,11 @@ def ready() -> StatusResponse:
     except ValueError:
         return JSONResponse(status_code=503, content={"status": "not ready"})
     return StatusResponse(status="ready")
+
+
+@app.get("/api/public-config", response_model=PublicConfigResponse, tags=["system"])
+def public_config() -> PublicConfigResponse:
+    return PublicConfigResponse(support_phone=settings.support_phone)
 
 
 @app.exception_handler(Exception)

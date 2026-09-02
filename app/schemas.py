@@ -23,6 +23,10 @@ class ChatResponse(BaseModel):
     sources: list[str]
 
 
+class PublicConfigResponse(BaseModel):
+    support_phone: str
+
+
 class LeadCreate(BaseModel):
     conversation_id: uuid.UUID | None = None
     name: str = Field(min_length=1, max_length=120)

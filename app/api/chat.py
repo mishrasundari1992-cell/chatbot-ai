@@ -21,6 +21,11 @@ KEYWORD_STOP_WORDS = {
     "from", "have", "information", "need", "please", "should", "that", "their", "there",
     "these", "they", "this", "what", "when", "where", "which", "with", "would", "your",
 }
+FOLLOW_UP_PATTERN = re.compile(
+    r"\b(it|that|this|same|still|again|yes|no|worked|working|error|issue|problem|now|then)\b",
+    re.IGNORECASE,
+)
+ACKNOWLEDGEMENT_PATTERN = re.compile(r"^(yes|no|ok|okay|same|still|again|not working|it is not working)[.! ]*$", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -38,6 +43,22 @@ def keyword_terms(question: str) -> list[str]:
         if len(term) >= 4 and term not in KEYWORD_STOP_WORDS and term not in terms:
             terms.append(term)
     return terms[:12]
+
+
+def build_retrieval_query(question: str, history: list[tuple[str, str]]) -> str:
+    """Attach the recent customer issue when a message is an ambiguous follow-up."""
+    words = re.findall(r"[a-z0-9]+", question.casefold())
+    needs_context = len(words) <= 8 or bool(FOLLOW_UP_PATTERN.search(question))
+    if not needs_context:
+        return question
+    prior_user_messages = [
+        content.strip() for role, content in reversed(history)
+        if role == "user" and content.strip() and not ACKNOWLEDGEMENT_PATTERN.fullmatch(content.strip())
+    ][:2]
+    if not prior_user_messages:
+        return question
+    prior_user_messages.reverse()
+    return f"Previous customer issue: {' | '.join(prior_user_messages)}\nCurrent follow-up: {question}"
 
 
 def rank_retrieved_chunks(
@@ -118,16 +139,17 @@ def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db)) 
         db.flush()
     if settings.ai_provider_mode == "openai" and month_usage(db) >= settings.monthly_token_limit:
         raise HTTPException(status_code=429, detail="Monthly OpenAI usage limit reached")
+    history_rows = db.execute(select(Message.role, Message.content).where(Message.conversation_id == conversation.id).order_by(Message.created_at.desc()).limit(8)).all()
+    history = list(reversed(history_rows))
+    retrieval_query = build_retrieval_query(payload.message, history)
     try:
         service = get_ai_provider(settings)
-        vectors, embedding_tokens = service.embed([payload.message])
+        vectors, embedding_tokens = service.embed([retrieval_query])
     except AIConfigurationError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=503, detail="Chat service is temporarily unavailable") from exc
-    rows = retrieve_chunks(db, service, vectors[0], payload.message, settings)
-    history_rows = db.execute(select(Message.role, Message.content).where(Message.conversation_id == conversation.id).order_by(Message.created_at.desc()).limit(6)).all()
-    history = list(reversed(history_rows))
+    rows = retrieve_chunks(db, service, vectors[0], retrieval_query, settings)
     sources = list(dict.fromkeys(row.filename for row in rows))
     if rows:
         try:

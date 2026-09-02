@@ -46,6 +46,24 @@ function speak(text) {
   window.speechSynthesis.speak(utterance);
 }
 
+function renderBasicMarkdown(node, text) {
+  node.replaceChildren();
+  const lines = String(text).split('\n');
+  lines.forEach((line, lineIndex) => {
+    const parts = line.split(/(\*\*[^*\n]+\*\*)/g);
+    parts.forEach(part => {
+      if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+        const strong = document.createElement('strong');
+        strong.textContent = part.slice(2, -2);
+        node.appendChild(strong);
+      } else {
+        node.appendChild(document.createTextNode(part));
+      }
+    });
+    if (lineIndex < lines.length - 1) node.appendChild(document.createElement('br'));
+  });
+}
+
 function addMessage(text, type, sources = []) {
   const node = document.createElement('div');
   node.className = `message ${type}`;
@@ -147,6 +165,10 @@ chatForm.addEventListener('submit', async event => {
   event.preventDefault();
   const message = input.value.trim();
   if (!message) return;
+  await sendChatMessage(message);
+});
+
+async function sendChatMessage(message) {
   addMessage(message, 'user');
   input.value = '';
   const pending = addMessage('Thinking…', 'bot');
@@ -157,11 +179,11 @@ chatForm.addEventListener('submit', async event => {
     if (!response.ok) throw new Error(data.detail || 'Unable to answer right now.');
     conversationId = data.conversation_id;
     sessionStorage.setItem('conversationId', conversationId);
-    pending.textContent = data.answer;
+    renderBasicMarkdown(pending, data.answer);
     if (data.sources.length) { const src = document.createElement('div'); src.className = 'sources'; src.textContent = `Sources: ${data.sources.join(', ')}`; messages.appendChild(src); }
   } catch (error) { pending.textContent = error.message; }
   finally { sendButton.disabled = false; input.focus(); messages.scrollTop = messages.scrollHeight; }
-});
+}
 
 document.querySelector('#lead-toggle').addEventListener('click', () => leadForm.classList.toggle('hidden'));
 document.querySelector('#career-toggle').addEventListener('click', () => careerForm.classList.toggle('hidden'));

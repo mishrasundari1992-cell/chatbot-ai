@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     max_answer_tokens: int = Field(500, ge=64, le=2000)
     max_resume_mb: int = Field(5, ge=1, le=10)
     hr_notification_email: str = "hrd@itsipl.com"
+    support_phone: str = "+91-011-47695000"
     smtp_host: str = ""
     smtp_port: int = Field(587, ge=1, le=65535)
     smtp_username: str = ""

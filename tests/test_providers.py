@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.config import Settings
-from app.api.chat import NO_INFORMATION, RetrievedChunk, compatible_chunks_query, keyword_terms, rank_retrieved_chunks
+from app.api.chat import NO_INFORMATION, RetrievedChunk, build_retrieval_query, compatible_chunks_query, keyword_terms, rank_retrieved_chunks
 from app.services.bedrock_service import BedrockService
 from app.services.indexing import is_compatible, reindex_document
 from app.services.ai_provider import MockAIProvider
@@ -139,6 +139,22 @@ def test_nova_converse_request_and_response_parsing():
     assert "invent services, prices, contacts, partners, certifications, policies" in request["system"][0]["text"]
     assert request["inferenceConfig"]["maxTokens"] == provider.settings.max_answer_tokens
     assert (answer, input_tokens, output_tokens) == ("Company answer", 4, 2)
+
+
+def test_follow_up_retrieval_query_keeps_previous_customer_issue():
+    history = [
+        ("user", "GlobalProtect VPN is not connecting."),
+        ("assistant", "What exact error do you see?"),
+    ]
+    query = build_retrieval_query("Portal not found", history)
+    assert "GlobalProtect VPN is not connecting" in query
+    assert "Portal not found" in query
+
+
+def test_new_detailed_question_does_not_reuse_old_topic():
+    history = [("user", "Sophos is using high CPU."), ("assistant", "Is a scan running?")]
+    question = "How can I troubleshoot a Commvault MediaAgent that is offline or unreachable?"
+    assert build_retrieval_query(question, history) == question
 
 
 def test_bedrock_provider_does_not_create_client_until_invoked(monkeypatch):

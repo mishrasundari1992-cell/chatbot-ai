@@ -11,6 +11,13 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
+def test_public_config_exposes_only_support_contact():
+    response = client.get("/api/public-config")
+    assert response.status_code == 200
+    assert response.json() == {"support_phone": "+91-011-47695000"}
+    assert "api_key" not in response.text.lower()
+
+
 def test_admin_requires_key():
     response = client.get("/api/admin/documents")
     assert response.status_code == 401
@@ -78,6 +85,10 @@ def test_static_interface():
     assert 'value="hi-IN"' in response.text
     assert 'id="career-form"' in response.text
     assert 'name="resume"' in response.text
+    assert 'id="problem-solved"' in response.text
+    assert 'id="still-not-working"' in response.text
+    assert 'id="request-callback"' in response.text
+    assert 'id="call-support"' in response.text
 
 
 def test_voice_implementation_is_browser_only():
